@@ -23,8 +23,10 @@ pipeline {
                                 sshCredentials: [
                                     username: "$USERNAME",
                                     encryptedPassphrase: "$USERPASS"
-                                ], 
+                                ],
+                                script {
                                     'sh /home/deploy/jagadeesh/train-schedule_example-solution/gradlew build && sh /home/deploy/jagadeesh/train-schedule_example-solution/gradlew npm_start'
+                                }
                             )
                         ]
                     )
