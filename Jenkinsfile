@@ -25,9 +25,8 @@ pipeline {
                                     encryptedPassphrase: "$USERPASS"
                                 ], 
                                 transfers: [
-                                    sshTransfer(
-                                        dir("/home/deploy/jagadeesh/train-schedule_example-solution") 
-                                        execCommand: './gradlew build && ./gradlew npm_start'
+                                    sshTransfer( 
+                                        execCommand: 'sh /home/deploy/jagadeesh/train-schedule_example-solution/gradlew build && sh /home/deploy/jagadeesh/train-schedule_example-solution/gradlew npm_start'
                                     )
                                 ]
                             )
