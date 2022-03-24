@@ -26,9 +26,10 @@ pipeline {
                                 ], 
                                 transfers: [
                                     sshTransfer(
-                                        sourceFiles: '/home/deploy/',
+                                        sourceFiles: 'dist/trainSchedule.zip',
+                                        removePrefix: 'dist/',
                                         remoteDirectory: '/tmp',
-                                        execCommand: 'cp /home/deploy/* /tmp'
+                                        execCommand: 'sudo /usr/bin/yum install httpd'
                                     )
                                 ]
                             )
