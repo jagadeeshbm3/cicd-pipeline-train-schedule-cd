@@ -1,20 +1,73 @@
-#!/usr/bin/groovy
-
-@Library('https://github.com/lachie83/jenkins-pipeline@master')
-
-def pipeline = new io.estrado.Pipeline()
-def cloud = pipeline.getCloud(env.BRANCH_NAME)
-def label = pipeline.getPodLabel(cloud)
-
-// deploy only the staging branch
-if (env.BRANCH_NAME == 'staging') {
-    stage ('deploy to k8s staging') {
-      //Deploy to staging
-    }
-}
-// deploy only the master branch
-if (env.BRANCH_NAME == 'master') {
-    stage ('deploy to k8s production') {
-      //Deploy to production
+pipeline {
+    agent any
+    stages {
+        stage('Build') {
+            steps {
+                echo 'Running build automation'
+                sh './gradlew build --no-daemon'
+                archiveArtifacts artifacts: 'dist/trainSchedule.zip'
+            }
+        }
+        stage('DeployToStaging') {
+            when {
+                branch 'master'
+            }
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'webserver_login1', usernameVariable: 'USERNAME', passwordVariable: 'USERPASS')]) {
+                    sshPublisher(
+                        failOnError: true,
+                        continueOnError: false,
+                        publishers: [
+                            sshPublisherDesc(
+                                configName: 'staging',
+                                sshCredentials: [
+                                    username: "$USERNAME",
+                                    encryptedPassphrase: "$USERPASS"
+                                ], 
+                                transfers: [
+                                    sshTransfer(
+                                        sourceFiles: '/home/deploy/',
+                                        remoteDirectory: '/tmp',
+                                        execCommand: 'cp /home/deploy/* /tmp'
+                                    )
+                                ]
+                            )
+                        ]
+                    )
+                }
+            }
+        }
+        stage('DeployToProduction') {
+            when {
+                branch 'master'
+            }
+            steps {
+                input 'Does the staging environment look OK?'
+                milestone(1)
+                withCredentials([usernamePassword(credentialsId: 'webserver_login1', usernameVariable: 'USERNAME', passwordVariable: 'USERPASS')]) {
+                    sshPublisher(
+                        failOnError: true,
+                        continueOnError: false,
+                        publishers: [
+                            sshPublisherDesc(
+                                configName: 'production',
+                                sshCredentials: [
+                                    username: "$USERNAME",
+                                    encryptedPassphrase: "$USERPASS"
+                                ], 
+                                transfers: [
+                                    sshTransfer(
+                                        sourceFiles: 'dist/trainSchedule.zip',
+                                        removePrefix: 'dist/',
+                                        remoteDirectory: '/tmp',
+                                        execCommand: 'sudo /usr/bin/systemctl stop train-schedule && rm -rf /opt/train-schedule/* && unzip /tmp/trainSchedule.zip -d /opt/train-schedule && sudo /usr/bin/systemctl start train-schedule'
+                                    )
+                                ]
+                            )
+                        ]
+                    )
+                }
+            }
+        }
     }
 }
