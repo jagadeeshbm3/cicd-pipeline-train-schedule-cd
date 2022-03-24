@@ -2,7 +2,7 @@ pipeline
 {
         stages 
         {
-               stage('Build')
+               stage('staging')
                {
                      steps
                      {
@@ -13,11 +13,11 @@ pipeline
                 {
                    when
                    {
-                       branch 'developer'
+                       branch 'staging'
                    }
                    steps
                    {
-                      echo 'run this stage - only if the branch = developer branch'
+                      echo 'run this stage - only if the branch = staging branch'
                    }
                 }
         stage('Deliver for development') 
