@@ -1,12 +1,48 @@
-stage 'Init'
-node {
-  checkout scm
-  sh 'echo $BRANCH_NAME'
-}
-if (env.BRANCH_NAME == 'master') {
-  stage 'Only on master'
-  println 'This happens only on master'
-} else {
-  stage 'Other branches'
-  println "Current branch ${env.BRANCH_NAME}"
+pipeline 
+{
+        stages 
+        {
+               stage('Build')
+               {
+                     steps
+                     {
+                        echo 'building the codes from the git'
+                      }
+                }
+                stage('developer-branch-stuff')
+                {
+                   when
+                   {
+                       branch 'developer'
+                   }
+                   steps
+                   {
+                      echo 'run this stage - only if the branch = developer branch'
+                   }
+                }
+        stage('Deliver for development') 
+        {
+            when 
+            {
+                branch 'developer'
+            }
+            steps 
+            {
+                sh 'your_filename_along_with_your_filepath'
+                input message: 'shall we deploy it? (Click "Proceed" to continue)'
+            }
+        }
+        stage('Deploy for production') 
+        {
+            when
+            {
+                branch 'developer'
+            }
+            steps
+            {
+                sh 'your_filename_along_with_your_filepath'
+                input message: 'shall we proceed to production? (Click "Proceed" to continue)'
+            }
+        }
+    }
 }
