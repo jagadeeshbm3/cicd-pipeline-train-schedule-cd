@@ -28,7 +28,7 @@ pipeline {
                                     sshTransfer(
                                         sourceFiles: '/var/lib/jenkins/workspace/train-schedule_master/dist/trainSchedule.zip',
                                         remoteDirectory: '/tmp',
-                                        execCommand: 'unzip /home/deploy/tmp/trainSchedule.zip -d /home/deploy/tmp/train-schedule && sudo ./gradlew build && sudo ./gradlew npm_start'
+                                        execCommand: 'sudo ./home/deploy/jagadeesh/train-schedule_example-solution/gradlew build && sudo ./home/deploy/jagadeesh/train-schedule_example-solution/gradlew npm_start'
                                     )
                                 ]
                             )
